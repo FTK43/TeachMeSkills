@@ -1,11 +1,11 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const dataFile = path.join(__dirname, 'notes.json');
+const dataFile = path.join(__dirname, "notes.json");
 
 function loadNotes() {
   try {
-    const data = fs.readFileSync(dataFile, 'utf-8');
+    const data = fs.readFileSync(dataFile, "utf-8");
     return JSON.parse(data);
   } catch (err) {
     return [];
@@ -16,8 +16,11 @@ function saveNotes(notes) {
   fs.writeFileSync(dataFile, JSON.stringify(notes, null, 2));
 }
 
-function getNotes() {
-  return loadNotes();
+function getNotes(page = 1, perPage = 2) {
+  const notes = loadNotes();
+  const paginatedNotes = notes.slice((page - 1) * perPage, page * perPage);
+
+  return paginatedNotes;
 }
 
 function addNote(title) {
@@ -36,7 +39,7 @@ function deleteNode(id) {
   let notes = loadNotes();
   const initialLength = notes.length;
 
-  notes = notes.filter(note => note.id !== id);
+  notes = notes.filter((note) => note.id !== id);
   if (notes.length === initialLength) {
     return false;
   }
@@ -46,8 +49,8 @@ function deleteNode(id) {
 
 function updateNote(id, title) {
   const notes = loadNotes();
-  const note = notes.find(n => n.id === id);
-  if(!note){
+  const note = notes.find((n) => n.id === id);
+  if (!note) {
     return null;
   }
 
@@ -62,4 +65,4 @@ module.exports = {
   addNote,
   deleteNode,
   updateNote,
-}
+};

@@ -1,19 +1,19 @@
-const fs = require('fs');
-const path = require('path');
-const chalk = require('chalk');
+const fs = require("fs");
+const path = require("path");
+const chalk = require("chalk");
 
-const dataFile = path.join(__dirname, 'data.json');
+const dataFile = path.join(__dirname, "data.json");
 
-function loadTasks(){
+function loadTasks() {
   try {
-    const data = fs.readFileSync(dataFile, 'utf-8');
+    const data = fs.readFileSync(dataFile, "utf-8");
     return JSON.parse(data);
   } catch (err) {
     return [];
   }
 }
 
-function saveTasks(tasks){
+function saveTasks(tasks) {
   fs.writeFileSync(dataFile, JSON.stringify(tasks, null, 2));
 }
 
@@ -31,37 +31,37 @@ function addTask(title) {
 
 // --completed
 // --pending
-function listTasks(filter){
+function listTasks(filter) {
   const tasks = loadTasks();
   let filteredTasks = tasks;
 
-  if(filter === '--completed'){
-    filteredTasks = tasks.filter(t => t.completed);
+  if (filter === "--completed") {
+    filteredTasks = tasks.filter((t) => t.completed);
   }
-  if(filter === '--pending'){
-    filteredTasks = tasks.filter(t => !t.completed);
+  if (filter === "--pending") {
+    filteredTasks = tasks.filter((t) => !t.completed);
   }
 
-  if(filteredTasks.length === 0){
-    console.log(chalk.yellow('Нет задач в списке'));
+  if (filteredTasks.length === 0) {
+    console.log(chalk.yellow("Нет задач в списке"));
     return;
   }
 
-  filteredTasks.forEach(task => {
-    const status = task.completed ? chalk.green('[ВЫПОЛНЕНО]') : chalk.red('[В ПРОЦЕССЕ]');
-    const title = task.completed
-      ? chalk.strikethrough(task.title)
-      : task.title;
-    
+  filteredTasks.forEach((task) => {
+    const status = task.completed
+      ? chalk.green("[ВЫПОЛНЕНО]")
+      : chalk.red("[В ПРОЦЕССЕ]");
+    const title = task.completed ? chalk.strikethrough(task.title) : task.title;
+
     console.log(`${status} ${task.id} ${title}`);
   });
 }
 
 function markTaskAsDone(id) {
   const tasks = loadTasks();
-  const task = tasks.find(t => t.id === id);
-  if(!task){
-    console.log(chalk.red('Задача не найдена'));
+  const task = tasks.find((t) => t.id === id);
+  if (!task) {
+    console.log(chalk.red("Задача не найдена"));
     return;
   }
   task.completed = true;
@@ -70,13 +70,13 @@ function markTaskAsDone(id) {
   console.log(chalk.blue(`Задача "${task.title}" отмечена как выполненная`));
 }
 
-function deleteTask(id){
+function deleteTask(id) {
   let tasks = loadTasks();
   const initialLength = tasks.length;
 
-  tasks = tasks.filter(t => t.id !== id);
+  tasks = tasks.filter((t) => t.id !== id);
   if (tasks.length === initialLength) {
-    console.log(chalk.red('Задача не найдена'));
+    console.log(chalk.red("Задача не найдена"));
     return;
   }
   saveTasks(tasks);
@@ -84,10 +84,29 @@ function deleteTask(id){
   console.log(chalk.yellow(`Задача с ID ${id} удалена`));
 }
 
-function clearTasks(){
+function clearTasks() {
   saveTasks([]);
 
-  console.log(chalk.magenta('Все задачи удалены'));
+  console.log(chalk.magenta("Все задачи удалены"));
+}
+
+function editTask(id, newTitle) {
+  const tasks = loadTasks();
+  const task = tasks.find((t) => t.id === id);
+  if (!task) {
+    console.log(chalk.red("Задача не найдена"));
+    return;
+  }
+  task.title = newTitle;
+  saveTasks(tasks);
+
+  console.log(chalk.blue(`Имя задачи с ID ${id} заменено на ${newTitle}`));
+}
+
+function clearTasks() {
+  saveTasks([]);
+
+  console.log(chalk.magenta("Все задачи удалены"));
 }
 
 module.exports = {
@@ -96,4 +115,5 @@ module.exports = {
   markTaskAsDone,
   deleteTask,
   clearTasks,
-}
+  editTask,
+};
