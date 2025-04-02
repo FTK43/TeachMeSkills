@@ -29,6 +29,18 @@ function addTask(title) {
   console.log(chalk.green(`Задача добавлена: "${title}"`));
 }
 
+function editTask(id, title) {
+  const tasks = loadTasks();
+  const taskEdited = tasks.find((task) => task.id === id);
+  if (!taskEdited) {
+    console.log(chalk.red('Задача не найдена'));
+    return;
+  }
+  taskEdited.title = title;
+  saveTasks(tasks);
+  console.log(`Задача с ID ${id} изменена на ${chalk.bgBlueBright(title)}`)
+}
+
 // --completed
 // --pending
 function listTasks(filter){
@@ -52,7 +64,7 @@ function listTasks(filter){
     const title = task.completed
       ? chalk.strikethrough(task.title)
       : task.title;
-    
+
     console.log(`${status} ${task.id} ${title}`);
   });
 }
@@ -92,6 +104,7 @@ function clearTasks(){
 
 module.exports = {
   addTask,
+  editTask,
   listTasks,
   markTaskAsDone,
   deleteTask,
