@@ -19,9 +19,18 @@ const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if(method === 'GET' && path === '/notes'){
+    const query = parsedUrl.query;
+    const page = parseInt(String(query.page)) || 1;
+    const limit = parseInt(String(query.limit)) || 10;
+
     const notes = getNotes();
+
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const paginatedNotes = notes.slice(start, end);
+
     res.writeHead(200, { 'content-type': 'application/json'});
-    res.end(JSON.stringify(notes));
+    res.end(JSON.stringify(paginatedNotes));
   }
 
   else if(method === 'POST' && path === '/notes'){

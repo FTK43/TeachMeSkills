@@ -1,4 +1,4 @@
-const { addTask, listTasks, markTaskAsDone, deleteTask, clearTasks } = require('./taskManager');
+const { addTask, listTasks, markTaskAsDone, deleteTask, clearTasks, editTask } = require('./taskManager');
 
 const [,, command, ...args] = process.argv
 // 0 - node 
@@ -43,8 +43,24 @@ switch (command) {
   case 'clear':
     clearTasks()
     break;
-    
+
+  case 'edit':
+    const editId = parseInt(args[0], 10);
+    const taskTitle = args.slice(1).join(' ');
+
+    if (isNaN(editId)) {
+      console.log('Нужно указать корректный ID задачи');
+      process.exit(1);
+    }
+
+    if (!taskTitle) {
+      console.log('Нужно указать корректное название задачи');
+      process.exit(1);
+    }
+    editTask(editId, taskTitle)
+    break;
+
   default:
     console.log('Неизвестная команда');
-    console.log('Доступные команды: add, list, done, delete, clear');
+    console.log('Доступные команды: add, list, done, delete, clear, edit');
 }

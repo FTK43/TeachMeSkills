@@ -52,7 +52,7 @@ function listTasks(filter){
     const title = task.completed
       ? chalk.strikethrough(task.title)
       : task.title;
-    
+
     console.log(`${status} ${task.id} ${title}`);
   });
 }
@@ -90,10 +90,26 @@ function clearTasks(){
   console.log(chalk.magenta('Все задачи удалены'));
 }
 
+function editTask(id, taskTitle) {
+  const tasks = loadTasks();
+  let task = tasks.find(t => t.id === id);
+
+  if (!task) {
+    console.log(chalk.red('Задача не найдена'));
+    return;
+  }
+
+  task.title = taskTitle;
+
+  saveTasks(tasks)
+  console.log(chalk.blue(`Задача "${task.id}" была изменена`));
+}
+
 module.exports = {
   addTask,
   listTasks,
   markTaskAsDone,
   deleteTask,
   clearTasks,
+  editTask
 }
