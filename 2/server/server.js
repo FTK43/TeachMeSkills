@@ -13,13 +13,21 @@ const server = http.createServer((req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const method = req.method;
   const path = parsedUrl.pathname;
+  const {query} = parsedUrl;
 
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if(method === 'GET' && path === '/notes'){
-    const notes = getNotes();
+    const pageNumber = !isNaN(query.page) ? parseInt(query.page) : 1;
+    const limit =!isNaN(query.limit)? parseInt(query.limit) : 10;
+
+    const startIndex = (pageNumber - 1) * limit;
+    const endIndex = pageNumber * limit;
+
+    const notes = getNotes().slice(startIndex, endIndex);
+
     res.writeHead(200, { 'content-type': 'application/json'});
     res.end(JSON.stringify(notes));
   }
@@ -56,7 +64,7 @@ const server = http.createServer((req, res) => {
       res.end(JSON.stringify({error: 'Invalid ID'}));
     }
     const success = deleteNode(id);
-    
+
     if (success) {
       res.writeHead(200, {'content-type': 'application/json'});
       res.end(JSON.stringify({message: `note with id ${id} - deleted`}));
@@ -98,10 +106,10 @@ const server = http.createServer((req, res) => {
         res.end(JSON.stringify({ error: err.message }));
       }
     });
-  } 
+  }
   else {
     res.writeHead(404, {'content-type': 'application/json'});
-    res.end(JSON.stringify({error: 'Method Not Found'}));  
+    res.end(JSON.stringify({error: 'Method Not Found'}));
   }
 });
 
