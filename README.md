@@ -1,13 +1,12 @@
-Создать свой NestJs проект
-Создайте модуль, контроллер и сервис для управления пользователями
-B UsersController реализуйте два маршрута:
-- POST /users -› создание пользователя
-- GET /users -> получение всех пользователей
-- Создайте DTO и ValidationP для создания пользователя:
-- Поля DTO:
+```branches:
 
- username -> строка, минимум 3 символа
+ridvan
 
-  email -> строка, валидный email
-- B UsersService реализуйте onModulelnit() и напишите в консоль: "UsersService initialized"
-- Если данные невалидные -> вернуть ошибку
+ridvan/dev
+
+ridvan/hw_1
+ridvan/hw_2
+
+ridvan/hw_3
+
+```
