@@ -4,7 +4,7 @@ export class User {
   id: number;
 
   constructor(
-    public usernames: string,
+    public username: string,
     public email: string,
   ) {
     this.id = ++id;
