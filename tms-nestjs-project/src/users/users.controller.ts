@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Put,
@@ -30,12 +31,15 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param() id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOne(id);
   }
 
   @Put(':id')
-  updateUser(@Body() user: CreateUserDto, @Param() id: number) {
+  updateUser(
+    @Body() user: CreateUserDto,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     const userToUpdate: UpdateUserDto = {
       ...user,
       id,
@@ -45,7 +49,7 @@ export class UsersController {
 
   @Patch(':id')
   updateUserProperties(
-    @Param() id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() user: UpdatePropertiesUserDto,
   ) {
     const userToUpdate = {
@@ -57,7 +61,7 @@ export class UsersController {
 
   @Delete(':id')
   @HttpCode(204)
-  deleteUser(@Param() id: number) {
+  deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.userService.deleteUser(id);
   }
 }
