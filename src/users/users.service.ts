@@ -1,83 +1,60 @@
 import {
-  BadRequestException,
   Inject,
   Injectable,
+  NotFoundException,
   OnModuleInit,
   Scope,
 } from '@nestjs/common';
 import { User } from './user.entity';
-import { CreateUserDto } from './dtos/create-uset.dto';
 import { LoggerService } from '../logger/logger.service';
-import { UpdateUserDto } from './dtos/update-user.dto';
-import { PatchUserDto } from './dtos/patch-user.dto';
-
+import { UsersRepository } from './repository/users.repository';
 let users: User[] = [];
 @Injectable({ scope: Scope.TRANSIENT })
 export class UsersService implements OnModuleInit {
-  constructor(@Inject('APP_CONFIG') private readonly logger: LoggerService) {}
+  constructor(
+    @Inject('APP_CONFIG') private readonly logger: LoggerService,
+    private readonly usersRepository: UsersRepository,
+  ) {}
+
   onModuleInit(): any {
-    console.log('UsersService Inititalized');
+    this.logger.log('UsersService Inititalized');
   }
 
-  private findById(id: User['id']): User | undefined {
-    return users.find((user) => user.id === id);
+  findAll(search?: string): Promise<User[]> {
+    return this.usersRepository.findAllActiveUsers(search);
   }
 
-  public findAll(): User[] {
-    return users;
+  create(userData: Partial<User>): Promise<User> {
+    const user: User = this.usersRepository.create(userData);
+    return this.usersRepository.save(user);
   }
 
-  public create({ username, email }: CreateUserDto) {
-    const user = new User(username, email);
-    users.push(user);
+  async findOne(id: number): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ id });
 
-    this.logger.log('User Created');
+    if (!user) {
+      throw new NotFoundException(`User with id: ${id} not found!`);
+    }
 
     return user;
   }
 
-  public update(id, { username, email }: UpdateUserDto) {
-    const user = this.findById(id);
+  async update(id: number, updateData: Partial<User>): Promise<User> {
+    const user = await this.findOne(id);
+    const updatedUser = this.usersRepository.merge(user, updateData);
 
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-
-    user.username = username;
-    user.email = email;
-
-    this.logger.log('User Updated');
-
-    return;
+    return this.usersRepository.save(updatedUser);
   }
 
-  public patch(userId: number, patchUserDto: PatchUserDto): User {
-    const user = this.findById(userId);
+  async removeHard(id: number): Promise<User> {
+    const user = await this.findOne(id);
 
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-
-    Object.entries(patchUserDto).forEach(([property, value]) => {
-      user[property] = value;
-    });
-
-    this.logger.log('User Patched');
-
-    return user;
+    return this.usersRepository.remove(user);
   }
 
-  public delete(userId: number) {
-    const user = this.findById(userId);
+  async removeSoft(id: number): Promise<User> {
+    const user = await this.update(id, { isActive: false });
 
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-
-    users = users.filter((u) => u !== user);
-
-    this.logger.log('User Deleted');
-
-    return;
+    return this.usersRepository.softRemove(user);
   }
 }
