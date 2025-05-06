@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user/create-user.dto';
 import { UsersService } from './users.service';
@@ -21,13 +22,13 @@ export class UsersController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() user: CreateUserDto): CreateUserDto {
+  create(@Body() user: CreateUserDto): Promise<CreateUserDto> {
     return this.userService.create(user);
   }
 
   @Get()
-  get(): CreateUserDto[] {
-    return this.userService.findAll();
+  getUsers(@Query('search') search: string): Promise<UpdateUserDto[]> {
+    return this.userService.findAll(search);
   }
 
   @Get(':id')
@@ -39,29 +40,27 @@ export class UsersController {
   updateUser(
     @Body() user: CreateUserDto,
     @Param('id', ParseIntPipe) id: number,
-  ) {
-    const userToUpdate: UpdateUserDto = {
-      ...user,
-      id,
-    };
-    return this.userService.updateUser(id, userToUpdate);
+  ): Promise<CreateUserDto> {
+    return this.userService.update(id, user);
   }
 
   @Patch(':id')
   updateUserProperties(
     @Param('id', ParseIntPipe) id: number,
-    @Body() user: UpdatePropertiesUserDto,
+    @Body() userProperties: UpdatePropertiesUserDto,
   ) {
-    const userToUpdate = {
-      ...user,
-      id,
-    };
-    return this.userService.updateUserProperties(id, userToUpdate);
+    return this.userService.update(id, userProperties);
   }
 
   @Delete(':id')
   @HttpCode(204)
   deleteUser(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.deleteUser(id);
+    return this.userService.remove(id);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  softDeleteUser(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.softRemove(id);
   }
 }
