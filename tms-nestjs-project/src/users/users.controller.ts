@@ -17,6 +17,7 @@ import { CreateUserDto } from './dto/create-user/create-user.dto';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user/update-user.dto.ts';
 import { UpdatePropertiesUserDto } from './dto/update-properties-user/update-properties-user.dto';
+import { Users } from './entities/user.entity';
 
 @Controller('users')
 export class UsersController {
@@ -24,14 +25,16 @@ export class UsersController {
 
   @Post()
   @HttpCode(201)
-  async create(@Body() user: CreateUserDto): Promise<void> {
+  async create(@Body() user: CreateUserDto): Promise<Users | void> {
     try {
-      await this.userService.create(user);
+      return await this.userService.create(user);
     } catch (error) {
-      throw new HttpException(
-        'user with this email already exists',
-        HttpStatus.CONFLICT,
-      );
+      if (error) {
+        throw new HttpException(
+          'user with this email already exists',
+          HttpStatus.CONFLICT,
+        );
+      }
     }
   }
 
