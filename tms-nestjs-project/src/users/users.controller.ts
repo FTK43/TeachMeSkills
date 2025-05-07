@@ -4,6 +4,8 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -22,8 +24,15 @@ export class UsersController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() user: CreateUserDto): Promise<CreateUserDto> {
-    return this.userService.create(user);
+  async create(@Body() user: CreateUserDto): Promise<void> {
+    try {
+      await this.userService.create(user);
+    } catch (error) {
+      throw new HttpException(
+        'user with this email already exists',
+        HttpStatus.CONFLICT,
+      );
+    }
   }
 
   @Get()
