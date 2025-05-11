@@ -1,4 +1,10 @@
-import {IsEmail, IsNotEmpty, IsString, MinLength} from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+} from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 
 export class CreateUserDto {
@@ -9,6 +15,9 @@ export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
+
+  @IsBoolean()
+  isActive: boolean;
 }
 
 export class UpdateUserDto extends CreateUserDto {
