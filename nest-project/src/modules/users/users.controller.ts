@@ -9,6 +9,8 @@ import {
   Post,
   Put,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
@@ -16,14 +18,32 @@ import {
   UpdateUserDto,
   UpdateUserPropertiesDto,
 } from './dtos/user.dto';
+import { Request } from 'express';
+import { RolesGuard } from '../../guards/roles.guard';
+import { Roles } from '../../guards/roles.decorator';
+import { AuthGuard } from '../../guards/auth.guard';
+import { WorkingHoursGuard } from '../../guards/working-hours.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
   @Get()
-  getUsers(@Query('search') search: string): Promise<UpdateUserDto[]> {
+  getUsers(
+    @Query('search') search: string,
+    @Req() req: Request,
+  ): Promise<UpdateUserDto[]> {
+    console.log(`REQUEST ID ${req.headers['x-request-id']}`);
+    console.log(`LOCALE IS: ${req['locale']}`);
     return this.usersService.findAll(search);
+  }
+
+  @UseGuards(WorkingHoursGuard)
+  @Get('workDay')
+  isItWorkDayNow() {
+    return 'Yes, you called during working hours';
   }
 
   @Get(':id')
