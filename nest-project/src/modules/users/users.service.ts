@@ -1,68 +1,91 @@
-import {Injectable, NotFoundException, OnModuleInit} from '@nestjs/common';
-import {CreateUserDto, UpdatedUserPropertiesDto, UpdateUserDto} from './dtos/user.dto';
+import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { UserRepository } from './repository/user.repository';
+import { User } from './entities/user.entity';
+import { UserDocument } from './schemas/user.schema';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
-  private users: UpdateUserDto[] = [];
-  private currentId: number = 1;
+  constructor(
+    // private readonly userRepository: UserRepository,
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+  ) {}
 
-  onModuleInit() {
-    console.log('UsersService initialized');
+  create(userData: Partial<User>) {
+    const createdUser = new this.userModel(userData);
+    return createdUser.save();
   }
 
-  getUsers() {
-    return this.users;
+  bulkCreate(users: Partial<User>[]) {
+    const createdUsers = users.map((userData) => new this.userModel(userData));
+    return this.userModel.bulkSave(createdUsers);
   }
 
-  findUserById(id: number) {
-    const user = this.users.find((user) => user.id === id);
+  async bulkCreateWithWrite(users: Partial<User>[]) {
+    const operations = users.map(user => ({
+      insertOne: {
+        document: user,
+      },
+    }));
+
+    return this.userModel.bulkWrite(operations);
+  }
+
+  findAll(search?: string) {
+    const filter = search
+      ? { username: { $regex: search, $options: 'i' }, isActive: true }
+      : { isActive: true };
+    return this.userModel.find(filter).select('-_id -__v').exec();
+  }
+
+  async findOne(id: number) {
+    const user = await this.userModel
+      .findOne({ id })
+      .select('-_id -__v')
+      .exec();
+
     if (!user) {
-      throw new NotFoundException('User is not found');
+      throw new NotFoundException(`User with id ${id} - not found `);
+    }
+
+    return user;
+  }
+
+  async update(id: number, updateData: Partial<User>) {
+    const user = await this.userModel
+      .findOneAndUpdate({ id }, updateData, { new: true })
+      .select('-_id -__v')
+      .exec();
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} - not found`);
     }
     return user;
   }
 
-  createUser(userData: CreateUserDto) {
-    const newUser = {
-      id: this.currentId,
-      ...userData,
-    };
-    this.users.push(newUser);
-    this.currentId++;
-    return userData;
+  async delete(id: number) {
+    const user = await this.userModel
+      .findOneAndDelete({ id })
+      .select('-_id -__v')
+      .exec();
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} - not found`);
+    }
+    return user;
   }
 
-  updateUser(data: UpdateUserDto) {
-    const updatedUserIndex = this.users.findIndex((user) => user.id === data.id);
-    if (updatedUserIndex < 0) {
-      throw new NotFoundException('User not found');
+  async bulkDelete(filter) {
+    console.log('service', filter)
+    const deletedUsers = await this.userModel
+      .deleteMany(filter)
+      .exec();
+    if (!deletedUsers) {
+      throw new NotFoundException(`No users to be deleted`);
     }
-    const updatedUser = {
-      ...this.users[updatedUserIndex],
-      ...data,
-    };
-    this.users.splice(updatedUserIndex, 1, updatedUser);
-    return updatedUser;
+    return deletedUsers;
   }
 
-  updateUserProperties(data: UpdatedUserPropertiesDto): UpdatedUserPropertiesDto {
-    const updatedUserIndex = this.users.findIndex((user) => user.id === data.id);
-    if (updatedUserIndex < 0) {
-      throw new NotFoundException('User not found');
-    }
-    const updatedUser = {
-      ...this.users[updatedUserIndex],
-      ...data,
-    };
-    this.users.splice(updatedUserIndex, 1, updatedUser);
-    return updatedUser;
-  }
-
-  deleteUser(id: number) {
-    const deletedUserIndex = this.users.findIndex((user)=> user.id === id);
-    if (deletedUserIndex < 0) {
-      throw new NotFoundException('User not found');
-    }
-    this.users.splice(deletedUserIndex, 1);
+  onModuleInit() {
+    console.log('UsersService initialized');
   }
 }
