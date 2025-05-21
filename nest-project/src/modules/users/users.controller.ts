@@ -26,6 +26,18 @@ export class UsersController {
     return this.usersService.findAll(search);
   }
 
+  @Post('bulk')
+  @HttpCode(201)
+  bulkCreate(@Body() users: CreateUserDto[]) {
+    return this.usersService.bulkCreateWithWrite(users);
+  }
+
+  @Delete('bulk')
+  @HttpCode(204)
+  bulkDelete(@Body() filter) {
+    this.usersService.bulkDelete(filter);
+  }
+
   @Get(':id')
   getUser(@Param('id') id: string): Promise<UpdateUserDto> {
     return this.usersService.findOne(Number(id));
@@ -39,7 +51,7 @@ export class UsersController {
 
   @Put(':id')
   @HttpCode(200)
-  updateUser(@Body() user: CreateUserDto, @Param('id') id: number) {
+  updateUser(@Body() user: UpdateUserDto, @Param('id') id: number) {
     return this.usersService.update(Number(id), user);
   }
 
