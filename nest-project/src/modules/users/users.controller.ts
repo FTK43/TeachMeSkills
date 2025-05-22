@@ -5,12 +5,16 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Put,
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
@@ -22,9 +26,12 @@ import { NextFunction, Request, Response } from 'express';
 import { RolesGuard } from '../../guards/roles.guard';
 import { Roles } from '../../guards/roles.decorator';
 import { AuthGuard } from '../../guards/auth.guard';
-import { WorkingHoursGuard } from '../../guards/working-hours.guard';
+import { TrimPipe } from '../../pipes/trim.pipe';
+import { ExectimeInterceptor } from '../../interceptors/exectime.interceptor';
+import { ForbiddenWordsPipe } from '../../pipes/forbidden-words.pipe';
 
 @Controller('users')
+// @UseInterceptors(ExectimeInterceptor)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -35,22 +42,25 @@ export class UsersController {
     return this.usersService.findAll(search);
   }
 
-  // @Get(':id')
-  // getUser(
-  //   @Param('id') id: string,
-  //   @Req() req: Request,
-  // ): Promise<UpdateUserDto> {
-  //   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  //   console.log(`REQUEST ID ${req.headers['x-request-id']}`);
-// 
-  //   console.log(`LOCALE IS: ${req['locale']}`);
-// 
-  //   return this.usersService.findOne(Number(id));
-  // }
+  @Get(':id')
+  getUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+  ): Promise<UpdateUserDto> {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    console.log(`REQUEST ID ${req.headers['x-request-id']}`);
+
+    console.log(`LOCALE IS: ${req['locale']}`);
+
+    return this.usersService.findOne(id);
+  }
 
   @Post()
   @HttpCode(201)
+  @UsePipes(new ValidationPipe({ whitelist: true }))
   createUser(@Body() user: CreateUserDto): Promise<CreateUserDto> {
+    console.log(JSON.stringify(user));
+
     return this.usersService.create(user);
   }
 
@@ -58,28 +68,35 @@ export class UsersController {
   @HttpCode(200)
   updateUser(
     @Body() user: CreateUserDto,
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<UpdateUserDto> {
-    return this.usersService.update(Number(id), user);
+    return this.usersService.update(id, user);
   }
 
   @Patch(':id')
   updateUserProperties(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() userProperties: Partial<UpdateUserPropertiesDto>,
   ) {
-    return this.usersService.update(Number(id), userProperties);
+    return this.usersService.update(id, userProperties);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  deleteUser(@Param('id') id: number) {
-    this.usersService.remove(Number(id));
+  deleteUser(@Param('id', ParseIntPipe) id: number) {
+    this.usersService.remove(id);
   }
 
-  @UseGuards(WorkingHoursGuard)
-  @Get('workday')
-  isItWorkDayNow() {
-    return 'Yes, you called during working hours';
+  //@UseGuards(WorkingHoursGuard)
+  //@Get('workday')
+  //isItWorkDayNow() {
+  //  return 'Yes, you called during working hours';
+  //}
+
+  @Post('user-tag')
+  createUserTag(@Body('tag', ForbiddenWordsPipe, TrimPipe) tag: string) {
+    return {
+      trimmedTag: tag,
+    };
   }
 }
