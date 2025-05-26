@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
@@ -29,6 +30,7 @@ import { AuthGuard } from '../../guards/auth.guard';
 import { TrimPipe } from '../../pipes/trim.pipe';
 import { ExectimeInterceptor } from '../../interceptors/exectime.interceptor';
 import { ForbiddenWordsPipe } from '../../pipes/forbidden-words.pipe';
+import { UserBannedException } from '../../exceptions/user-banned.exception';
 
 @Controller('users')
 // @UseInterceptors(ExectimeInterceptor)
@@ -57,7 +59,7 @@ export class UsersController {
 
   @Post()
   @HttpCode(201)
-  @UsePipes(new ValidationPipe({ whitelist: true }))
+  // @UsePipes(new ValidationPipe({ whitelist: true }))
   createUser(@Body() user: CreateUserDto): Promise<CreateUserDto> {
     console.log(JSON.stringify(user));
 
@@ -99,4 +101,21 @@ export class UsersController {
       trimmedTag: tag,
     };
   }
+
+  @Get('/get-user-balance/:id')
+  getUserBalance(@Param('id', ParseIntPipe) id: number) {
+    if (id === 5) {
+      throw new UserBannedException(id);
+    }
+    return 'ok';
+  }
+
+  // @Get('/simulate-api-call')
+  // simulateApiCall() {
+  //   try {
+  //     throw new Error('API METHOD GET USER WALLET NOT FOUND');
+  //   } catch {
+  //     throw new NotFoundException('Кошелек не найден');
+  //   }
+  // }
 }
