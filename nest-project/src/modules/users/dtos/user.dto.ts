@@ -29,3 +29,15 @@ export class UpdateUserPropertiesDto extends PartialType(CreateUserDto) {}
 export class UpdatedUserPropertiesDto extends UpdateUserPropertiesDto {
   id: number;
 }
+
+export enum UserRole {
+  USER = 'user',
+  ADMIN = 'admin',
+  MANAGER = 'manager',
+  SUPPORT = 'support',
+}
+
+export class ChangeUserRoleDto {
+  userId: number;
+  newRole: `${UserRole}`;
+}

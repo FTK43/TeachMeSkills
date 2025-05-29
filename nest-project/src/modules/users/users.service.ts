@@ -1,6 +1,13 @@
-import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { UserRepository } from './repository/user.repository';
 import { User } from './entities/user.entity';
+import { ChangeUserRoleDto, UserRole } from './dtos/user.dto';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
@@ -35,6 +42,31 @@ export class UsersService implements OnModuleInit {
   async delete(id: number) {
     const user = await this.findOne(id);
     return this.userRepository.softRemove(user);
+  }
+
+  async changeUserRole({ userId, newRole }: ChangeUserRoleDto) {
+    const user = await this.userRepository.findOneBy({ id: userId });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
+    if (user.role === 'admin') {
+      throw new ForbiddenException('Cannot change role for admin users');
+    }
+
+    if (user.role === newRole) {
+      throw new ForbiddenException('This role is already granted to this user');
+    }
+
+    if (!Object.values(UserRole).find((role) => role === newRole)) {
+      throw new BadRequestException(`${newRole} does not exist`);
+    }
+
+    return this.userRepository.save({
+      ...user,
+      role: newRole,
+    });
   }
 
   onModuleInit() {

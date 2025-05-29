@@ -14,8 +14,8 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
+  ChangeUserRoleDto,
   CreateUserDto,
-  UpdateUserDto,
   UpdateUserPropertiesDto,
 } from './dtos/user.dto';
 import { Request } from 'express';
@@ -31,10 +31,7 @@ export class UsersController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin')
   @Get()
-  getUsers(
-    @Query('search') search: string,
-    @Req() req: Request,
-  ): Promise<UpdateUserDto[]> {
+  getUsers(@Query('search') search: string, @Req() req: Request) {
     console.log(`REQUEST ID ${req.headers['x-request-id']}`);
     console.log(`LOCALE IS: ${req['locale']}`);
     return this.usersService.findAll(search);
@@ -47,7 +44,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  getUser(@Param('id') id: string): Promise<UpdateUserDto> {
+  getUser(@Param('id') id: string) {
     return this.usersService.findOne(Number(id));
   }
 
@@ -61,6 +58,13 @@ export class UsersController {
   @HttpCode(200)
   updateUser(@Body() user: CreateUserDto, @Param('id') id: number) {
     return this.usersService.update(Number(id), user);
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
+  @Patch('changeRole')
+  changeUserRole(@Body() changeUserRoleData: ChangeUserRoleDto) {
+    return this.usersService.changeUserRole(changeUserRoleData);
   }
 
   @Patch(':id')

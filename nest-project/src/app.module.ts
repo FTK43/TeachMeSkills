@@ -6,8 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './modules/users/entities/user.entity';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { RequestIdMiddleware } from './middlewares/request-id.middleware';
-import { JwtModule } from '@nestjs/jwt';
 import { LocaleMiddleware } from './middlewares/locale.middleware';
+import {ChangeRoleLoggerMiddleware} from "./middlewares/change-role-logger.middleware";
 
 @Module({
   imports: [
@@ -31,6 +31,8 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {
     consumer
       .apply(LoggerMiddleware, RequestIdMiddleware, LocaleMiddleware)
-      .forRoutes('*');
+      .forRoutes('*')
+      .apply(ChangeRoleLoggerMiddleware)
+      .forRoutes('users/changeRole');
   }
 }
