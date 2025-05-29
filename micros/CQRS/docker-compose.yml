@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  order-service:
+    build:
+      context: ./order-service
+    ports:
+      - "4001:4001"
+    depends_on:
+      - read-service
+
+  read-service:
+    build:
+      context: ./order-view-service
+    ports:
+      - "4002:4002"
