@@ -1,12 +1,22 @@
+/* eslint-disable @typescript-eslint/require-await */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
 import { User } from './modules/users/entities/user.entity';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { RequestIdMiddleware } from './middlewares/request-id.middleware';
 import { LocaleMiddleware } from './middlewares/locale.middleware';
+import * as redisStore from 'cache-manager-ioredis';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { Keyv } from 'keyv';
+import { CacheableMemory } from 'cacheable';
+import { createKeyv } from '@keyv/redis';
 
 @Module({
   imports: [
@@ -21,9 +31,27 @@ import { LocaleMiddleware } from './middlewares/locale.middleware';
       synchronize: true,
     }),
     UsersModule,
+    CacheModule.registerAsync({
+      useFactory: async () => {
+        return {
+          stores: [
+            new Keyv({
+              store: new CacheableMemory({ ttl: 10, lruSize: 5000 }),
+            }),
+            createKeyv('redis://localhost:6379'),
+          ],
+        };
+      },
+    }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor,
+    },
+  ],
   exports: [],
 })
 export class AppModule implements NestModule {
