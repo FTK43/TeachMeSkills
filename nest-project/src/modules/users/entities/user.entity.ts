@@ -4,6 +4,8 @@ import {
   PrimaryGeneratedColumn,
   DeleteDateColumn,
 } from 'typeorm';
+import { UserRole } from '../dtos/user.dto';
+
 @Entity('users-orm')
 export class User {
   @PrimaryGeneratedColumn()
@@ -20,4 +22,7 @@ export class User {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @Column({ default: 'user' })
+  role: `${UserRole}`;
 }

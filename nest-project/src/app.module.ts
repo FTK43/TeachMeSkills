@@ -1,9 +1,13 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './modules/users/entities/user.entity';
+import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { RequestIdMiddleware } from './middlewares/request-id.middleware';
+import { LocaleMiddleware } from './middlewares/locale.middleware';
+import {ChangeRoleLoggerMiddleware} from "./middlewares/change-role-logger.middleware";
 
 @Module({
   imports: [
@@ -21,5 +25,14 @@ import { User } from './modules/users/entities/user.entity';
   ],
   controllers: [AppController],
   providers: [AppService],
+  exports: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): any {
+    consumer
+      .apply(LoggerMiddleware, RequestIdMiddleware, LocaleMiddleware)
+      .forRoutes('*')
+      .apply(ChangeRoleLoggerMiddleware)
+      .forRoutes('users/changeRole');
+  }
+}
