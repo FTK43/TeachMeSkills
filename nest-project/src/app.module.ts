@@ -7,7 +7,10 @@ import { User } from './modules/users/entities/user.entity';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { RequestIdMiddleware } from './middlewares/request-id.middleware';
 import { LocaleMiddleware } from './middlewares/locale.middleware';
-import {ChangeRoleLoggerMiddleware} from "./middlewares/change-role-logger.middleware";
+import { ChangeRoleLoggerMiddleware } from './middlewares/change-role-logger.middleware';
+import { BullModule } from '@nestjs/bull';
+import { EmailModule } from './modules/email/email.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -22,6 +25,14 @@ import {ChangeRoleLoggerMiddleware} from "./middlewares/change-role-logger.middl
       synchronize: true,
     }),
     UsersModule,
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
+    EmailModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],
