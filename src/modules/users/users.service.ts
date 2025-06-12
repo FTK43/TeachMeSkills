@@ -6,7 +6,7 @@ import {
   Scope,
 } from '@nestjs/common';
 import { User } from './user.entity';
-import { LoggerService } from '../logger/logger.service';
+import { LoggerService } from '../../logger/logger.service';
 import { UsersRepository } from './repository/users.repository';
 let users: User[] = [];
 @Injectable({ scope: Scope.TRANSIENT })
