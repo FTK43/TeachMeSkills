@@ -7,7 +7,7 @@ import { Queue } from 'bull';
 export class EmailService {
   constructor(@InjectQueue('email') private readonly emailQueue: Queue) {}
 
-  @Cron('*/3 * * * * *')
+  // @Cron('*/3 * * * * *')
   async sendWelcomeEmail(receiverAddress: string) {
     const job = await this.emailQueue.add(
       'send-welcome-email',

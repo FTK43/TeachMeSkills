@@ -21,6 +21,8 @@ import { createKeyv } from '@keyv/redis';
 import { BullModule } from '@nestjs/bull';
 import { EmailModule } from './modules/email/email.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { UploadModule } from './modules/upload/upload.module';
+import { UploadMetadataEntity } from './modules/upload/entities/upload-metadata.entity';
 
 @Module({
   imports: [
@@ -31,7 +33,7 @@ import { ScheduleModule } from '@nestjs/schedule';
       username: 'myuser2',
       password: 'password',
       database: 'mydb2',
-      entities: [User],
+      entities: [User, UploadMetadataEntity],
       synchronize: true,
     }),
     UsersModule,
@@ -55,6 +57,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     EmailModule,
     ScheduleModule.forRoot(),
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [
