@@ -11,18 +11,27 @@ import {
   Post,
   Put,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-uset.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { PatchUserDto } from './dtos/patch-user.dto';
 import { UsersService } from './users.service';
+import { Request } from 'express';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { Roles } from 'src/guards/roles.decorator';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { HoursGuard } from 'src/guards/hours.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
   @Get()
-  public findAll(@Query('search') search?: string) {
+  public findAll(@Req() req: Request, @Query('search') search?: string) {
     return this.usersService.findAll(search);
   }
 
@@ -30,6 +39,12 @@ export class UsersController {
   @HttpCode(HttpStatus.CREATED)
   public create(@Body() createUserDto: CreateUserDto): Promise<CreateUserDto> {
     return this.usersService.create(createUserDto);
+  }
+
+  @UseGuards(HoursGuard({ start: 5, end: 17 }))
+  @Get('working-hours')
+  public workingHours() {
+    return 'Service available';
   }
 
   @Put(':id')
