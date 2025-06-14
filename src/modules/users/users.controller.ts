@@ -13,6 +13,7 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-uset.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
@@ -23,8 +24,12 @@ import { RolesGuard } from 'src/guards/roles.guard';
 import { Roles } from 'src/guards/roles.decorator';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { HoursGuard } from 'src/guards/hours.guard';
+import { TrimPipe } from 'src/pipes/trim.pipe';
+import { ExecTimeInterceptor } from 'src/interceptors/exectime.interceptor';
+import { ForbiddenWordsPipe } from 'src/pipes/forbidden-words.pipe';
 
 @Controller('users')
+@UseInterceptors(ExecTimeInterceptor)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -76,5 +81,10 @@ export class UsersController {
     }
 
     return !softDelete && this.usersService.removeHard(id);
+  }
+
+  @Post('create-tag')
+  public createTag(@Body('tag', TrimPipe, ForbiddenWordsPipe) tag: string) {
+    return { tag, length: tag.length };
   }
 }
