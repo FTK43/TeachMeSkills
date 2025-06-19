@@ -23,6 +23,7 @@ import { EmailModule } from './modules/email/email.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { UploadModule } from './modules/upload/upload.module';
 import { UploadMetadataEntity } from './modules/upload/entities/upload-metadata.entity';
+import { AppGateway } from './ws/app.gateway';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { UploadMetadataEntity } from './modules/upload/entities/upload-metadata.
     //   provide: APP_INTERCEPTOR,
     //   useClass: CacheInterceptor,
     // },
+    AppGateway,
   ],
   exports: [],
 })

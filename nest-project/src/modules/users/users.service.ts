@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { UserRepository } from './repository/user.repository';
 import { User } from './entities/user.entity';
+import { AppGateway } from '../../ws/app.gateway';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    // private readonly gateway: AppGateway,
+  ) {}
 
   onModuleInit() {
     console.log('UsersService initialized');
@@ -40,4 +44,11 @@ export class UsersService implements OnModuleInit {
     const user = await this.findOne(id);
     return this.userRepository.remove(user);
   }
+
+  // notifyAllUsers(message: string) {
+  //   this.gateway.emitToAll('userServiceMessage', {
+  //     text: message,
+  //     timestamp: Date.now(),
+  //   });
+  // }
 }

@@ -118,4 +118,10 @@ export class UsersController {
   //     throw new NotFoundException('Кошелек не найден');
   //   }
   // }
+
+  // @Post('send-to-ws')
+  // sendToWs() {
+  //   this.usersService.notifyAllUsers('УВЕДОМЛЕНИЕ ОТ СЕРВИСА USERS');
+  //   return { success: true };
+  // }
 }

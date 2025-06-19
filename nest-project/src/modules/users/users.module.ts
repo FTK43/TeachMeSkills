@@ -5,11 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { UserRepository } from './repository/user.repository';
 import { AuthModule } from '../auth/auth.module';
+import { AppGateway } from '../../ws/app.gateway';
 
 @Module({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   imports: [TypeOrmModule.forFeature([User]), AuthModule],
   controllers: [UsersController],
-  providers: [UsersService, UserRepository],
+  providers: [UsersService, UserRepository/*, AppGateway*/],
 })
 export class UsersModule {}
