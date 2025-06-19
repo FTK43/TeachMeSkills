@@ -24,6 +24,13 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { UploadModule } from './modules/upload/upload.module';
 import { UploadMetadataEntity } from './modules/upload/entities/upload-metadata.entity';
 import { AppGateway } from './ws/app.gateway';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig} from '@nestjs/apollo';
+import { join } from 'path';
+import { AppResolver } from './app.resolver';
+import { UserResolver } from './user/user.resolver';
+import { UsersService } from './modules/users/users.service';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -59,6 +66,12 @@ import { AppGateway } from './ws/app.gateway';
     EmailModule,
     ScheduleModule.forRoot(),
     UploadModule,
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      playground: true,
+    }),
+    UserModule,
   ],
   controllers: [AppController],
   providers: [
@@ -68,6 +81,8 @@ import { AppGateway } from './ws/app.gateway';
     //   useClass: CacheInterceptor,
     // },
     AppGateway,
+    AppResolver,
+    UserResolver,
   ],
   exports: [],
 })

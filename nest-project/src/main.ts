@@ -29,13 +29,15 @@ async function bootstrap() {
   const expressApp = app.getHttpAdapter().getInstance() as express.Express;
   expressApp.use('/admin/queues', serverAdapter.getRouter());
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
+  app.useGlobalPipes(new ValidationPipe());
+
+  // app.useGlobalPipes(
+  //   new ValidationPipe({
+  //     whitelist: true,
+  //     forbidNonWhitelisted: true,
+  //     transform: true,
+  //   }),
+  // );
   // app.useGlobalFilters(new LoggingExceptionFilter());
   // app.useGlobalInterceptors(new ExectimeInterceptor());
   await app.listen(process.env.PORT ?? 3000);

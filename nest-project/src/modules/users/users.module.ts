@@ -11,6 +11,7 @@ import { AppGateway } from '../../ws/app.gateway';
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   imports: [TypeOrmModule.forFeature([User]), AuthModule],
   controllers: [UsersController],
-  providers: [UsersService, UserRepository/*, AppGateway*/],
+  providers: [UsersService, UserRepository /*, AppGateway*/],
+  exports: [UsersService, UserRepository],
 })
 export class UsersModule {}

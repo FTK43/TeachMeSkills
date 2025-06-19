@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { UserRepository } from './repository/user.repository';
 import { User } from './entities/user.entity';
-import { AppGateway } from '../../ws/app.gateway';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
@@ -28,6 +27,16 @@ export class UsersService implements OnModuleInit {
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} - not found`);
+    }
+
+    return user;
+  }
+
+  async findOneByEmail(email: string): Promise<User> {
+    const user = await this.userRepository.findOneBy({ email });
+
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} - not found`);
     }
 
     return user;
