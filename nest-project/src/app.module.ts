@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
@@ -9,7 +8,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
-import { User } from './modules/users/entities/user.entity';
+import { User } from './graphql/user/user.entity';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { RequestIdMiddleware } from './middlewares/request-id.middleware';
 import { LocaleMiddleware } from './middlewares/locale.middleware';
@@ -25,12 +24,18 @@ import { UploadModule } from './modules/upload/upload.module';
 import { UploadMetadataEntity } from './modules/upload/entities/upload-metadata.entity';
 import { AppGateway } from './ws/app.gateway';
 import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver, ApolloDriverConfig} from '@nestjs/apollo';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { AppResolver } from './app.resolver';
-import { UserResolver } from './user/user.resolver';
+import { UserResolver } from './graphql/user/user.resolver';
 import { UsersService } from './modules/users/users.service';
-import { UserModule } from './user/user.module';
+import { UserModule } from './graphql/user/user.module';
+import { MessageModule } from './graphql/message/message.module';
+import { PostLoader } from './graphql/post/post.loader';
+import { PostService } from './graphql/post/post.service';
+import { LoaderMiddleware } from './graphql/post/loader.middleware';
+import { PostModule } from './graphql/post/post.module';
+import { Post } from './graphql/post/post.entity';
 
 @Module({
   imports: [
@@ -41,8 +46,9 @@ import { UserModule } from './user/user.module';
       username: 'myuser2',
       password: 'password',
       database: 'mydb2',
-      entities: [User, UploadMetadataEntity],
+      entities: [User, Post, UploadMetadataEntity],
       synchronize: true,
+      logging: true,
     }),
     UsersModule,
     CacheModule.registerAsync({
@@ -70,8 +76,15 @@ import { UserModule } from './user/user.module';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
+      installSubscriptionHandlers: true,
+      context: ({ req }) => ({
+        req,
+        loaders: req.loaders,
+      }),
     }),
     UserModule,
+    MessageModule,
+    PostModule,
   ],
   controllers: [AppController],
   providers: [
@@ -82,14 +95,18 @@ import { UserModule } from './user/user.module';
     // },
     AppGateway,
     AppResolver,
-    UserResolver,
   ],
   exports: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(LoggerMiddleware, RequestIdMiddleware, LocaleMiddleware)
+      .apply(
+        // LoggerMiddleware,
+        RequestIdMiddleware,
+        LocaleMiddleware,
+        LoaderMiddleware,
+      )
       .forRoutes('*');
   }
 }

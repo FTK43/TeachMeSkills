@@ -2,31 +2,49 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  posts: [Post!]!
+}
+
 type Post {
-  id: Int!
+  id: ID!
+  userId: Int!
   title: String!
   content: String!
 }
 
-type User {
+type Message {
   id: Int!
-  name: String
-  email: String!
-  posts: [Post]!
+  content: String!
+  author: String!
 }
 
 type Query {
   getHello: String!
+  findAll: [User!]!
   getUser: [User!]!
-  getUserById(id: Int!): User
-  getUserByEmail(email: String!): User
 }
 
 type Mutation {
   createUser(input: CreateUserInput!): User!
+  addMessage(author: String!, content: String!): Message!
+  createPost(input: CreatePostInput!): Post!
 }
 
 input CreateUserInput {
   name: String!
   email: String!
+}
+
+input CreatePostInput {
+  userId: Float!
+  title: String!
+  content: String!
+}
+
+type Subscription {
+  messageAdded: Message!
 }
