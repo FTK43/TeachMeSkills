@@ -8,7 +8,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
-import { User } from './graphql/user/user.entity';
+import { User } from './modules/users/entities/user.entity';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { RequestIdMiddleware } from './middlewares/request-id.middleware';
 import { LocaleMiddleware } from './middlewares/locale.middleware';
@@ -48,7 +48,7 @@ import { Post } from './graphql/post/post.entity';
       database: 'mydb2',
       entities: [User, Post, UploadMetadataEntity],
       synchronize: true,
-      logging: true,
+      // logging: true,
     }),
     UsersModule,
     CacheModule.registerAsync({

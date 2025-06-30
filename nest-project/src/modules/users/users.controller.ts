@@ -49,7 +49,6 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Req() req: Request,
   ): Promise<UpdateUserDto> {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     //console.log(`REQUEST ID ${req.headers['x-request-id']}`);
     //
     //console.log(`LOCALE IS: ${req['locale']}`);
